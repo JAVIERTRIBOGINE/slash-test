@@ -1,5 +1,5 @@
 
-# 🧠 How It Works
+# 🧠 Running the Project
 Clone the repository.
 Install Node.js. <<------  IMPORTANT!!!  - VERSION 24.3.0
 Install packages: run  `npm i`
@@ -49,7 +49,7 @@ Instead of generating all combinations, this utility lets you directly compute t
 
 getPlateAtPosition(1578); // returns "AB12"
 
-# ⚙️ How It Works
+## ⚙️ How It Works
 The function uses positional number systems (similar to base-N conversions) to compute each character of the plate.
 Characters are selected from a defined charset (e.g., ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789).
 Given:
