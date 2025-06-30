@@ -1,4 +1,3 @@
-// Definimos una interfaz para estructurar el resultado de cada petición fetch
 export interface FetchResult {
     url: string;                            // La URL que se intentó obtener
     status: 'fulfilled' | 'rejected';      // Estado del fetch: éxito o error
@@ -6,7 +5,6 @@ export interface FetchResult {
     reason?: string;                       // Mensaje de error si falló
 }
 
-// Función principal que hace fetch a múltiples URLs con una concurrencia máxima
 export async function callWithMaxConcurrency(
     urls: string[],                        // Lista de URLs a solicitar
     maxConcurrency: number                // Máximo número de peticiones simultáneas
@@ -15,21 +13,16 @@ export async function callWithMaxConcurrency(
     const inProgress = new Set<Promise<void>>(); // Set para rastrear fetches en curso
     let index = 0;                          // Índice actual dentro del array de URLs
 
-    // Retornamos una promesa que se resuelve cuando todas las peticiones han terminado
     return new Promise((resolve) => {
-        // Función interna que controla el ciclo de ejecución
         function next() {
-            // Si ya procesamos todas las URLs y no queda ninguna petición pendiente
             if (index === urls.length && inProgress.size === 0) {
                 resolve(results); // Resolvemos la promesa final con los resultados
                 return;
             }
 
-            // Mientras queden URLs por procesar y no se haya alcanzado el límite de concurrencia
             while (index < urls.length && inProgress.size < maxConcurrency) {
                 const url = urls[index]; // Obtenemos la URL actual
 
-                // Creamos la promesa del fetch
                 const promise = fetch(url)
                     .then((response) => {
                         // Si la respuesta no es "ok", lanzamos un error
@@ -39,37 +32,29 @@ export async function callWithMaxConcurrency(
                         return response.json(); // Convertimos la respuesta a JSON
                     })
                     .then((data) => {
-                        // Si todo fue bien, almacenamos el resultado como "fulfilled"
                         results.push({ url, status: 'fulfilled', value: data });
                     })
                     .catch((error: Error) => {
-                        // Si hubo error, almacenamos el resultado como "rejected"
                         results.push({ url, status: 'rejected', reason: error.message });
                     })
                     .finally(() => {
-                        // Al terminar (éxito o error), quitamos la promesa del set
                         inProgress.delete(promise);
                         console.log('inProgress: ', inProgress);
 
-                        // Llamamos a next() para procesar más URLs si quedan
                         next();
                     });
 
-                // Añadimos la promesa al conjunto de peticiones en curso
                 inProgress.add(promise);
 
-                index++; // Avanzamos al siguiente índice
+                index++;
             }
         }
 
-        next(); // Llamamos por primera vez a la función recursiva
+        next();
     });
 }
 
-// --- Uso de ejemplo ---
-// Si este archivo se ejecuta directamente (no importado como módulo)
 if (require.main === module) {
-    // Creamos un array de URLs para probar
     const urlsToFetch: string[] = [
         'https://jsonplaceholder.typicode.com/posts/1',
         'https://jsonplaceholder.typicode.com/posts/2',
@@ -83,7 +68,6 @@ if (require.main === module) {
 
     const maxConcurrentFetches = 3; // Límite de concurrencia
 
-    // Ejecutamos la función con nuestras URLs y concurrencia deseada
     callWithMaxConcurrency(urlsToFetch, maxConcurrentFetches)
         .then((allResults) => {
             console.log('All fetches completed:');
@@ -96,7 +80,6 @@ if (require.main === module) {
             });
         })
         .catch((error) => {
-            // Por si ocurre algún error inesperado
             console.error('An unhandled error occurred:', error);
         });
 }
